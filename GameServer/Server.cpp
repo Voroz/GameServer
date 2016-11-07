@@ -11,6 +11,15 @@ Server::~Server(){
 
 }
 
+void Server::send(sf::TcpSocket* socket, sf::Packet packet) {
+	if (socket->send(packet) == sf::Socket::Disconnected) {
+		cout << "client " << _clients[i].socket->getRemoteAddress() << " disconnected" << endl;
+		_clients[i].socket->disconnect();
+		delete _clients[i].socket;
+		_clients.erase(_clients.begin() + i);
+	}
+}
+
 void Server::run() {
 	sf::TcpListener listener;
 	listener.setBlocking(false);
@@ -36,25 +45,21 @@ void Server::run() {
 		else {
 			cout << "client " << client->getRemoteAddress() << " accepted" << endl;
 			_clients.push_back(client);
+			sf::Packet packet;
+			packet << PacketType::TId << _clients.back().id;
+			send(_clients.back().socket, packet);
 		}
 
-		// Ping clients, and check for disconnections
+		// Ping clients
 		for (int i = 0; i < _clients.size(); i++) {
 			sf::Packet packet;
-			packet << '0';
-			if (_clients[i].socket->send(packet) == sf::Socket::Disconnected) {
-				cout << "client " << _clients[i].socket->getRemoteAddress() << " disconnected" << endl;
-				_clients[i].socket->disconnect();
-				delete _clients[i].socket;
-				_clients.erase(_clients.begin() + i);
-			}
+			packet << PacketType::TPing;
+			send(_clients[i].socket, packet);
 		}
 	}
 
 	// Disconnect clients upon closing server
 	for (int i = 0; i < _clients.size(); i++) {
-		sf::Packet packet;
-		packet << '0';
 		_clients[i].socket->disconnect();
 		delete _clients[i].socket;
 		_clients.erase(_clients.begin() + i);

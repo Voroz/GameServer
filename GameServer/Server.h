@@ -6,8 +6,9 @@
 
 using namespace std;
 
-struct Data {
-
+enum PacketType{
+	TPing = 0,
+	TId
 };
 
 struct Client {
@@ -33,5 +34,7 @@ public:
 
 private:
 	vector<Client> _clients;
+
+	void send(sf::TcpSocket* socket, sf::Packet packet);
 };
 
