@@ -35,6 +35,6 @@ public:
 private:
 	vector<Client> _clients;
 
-	void send(sf::TcpSocket* socket, sf::Packet packet);
+	void send(Client& client, sf::Packet packet);
 };
 
