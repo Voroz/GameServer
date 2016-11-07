@@ -13,6 +13,7 @@ Server::~Server(){
 
 void Server::run() {
 	sf::TcpListener listener;
+	listener.setBlocking(false);
 
 	// bind the listener to a port
 	int port = 53000;
@@ -27,8 +28,7 @@ void Server::run() {
 	// accept a new connection
 	while (1) {
 		sf::TcpSocket* client = new sf::TcpSocket;
-		client->setBlocking(false);
-		listener.setBlocking(false);
+
 		if (listener.accept(*client) != sf::Socket::Done)
 		{
 			delete client;
