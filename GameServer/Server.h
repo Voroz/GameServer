@@ -16,13 +16,16 @@ enum PacketType{
 struct Client {
 	Client(sf::TcpSocket* socket) : 
 		socket(socket),
-		id(nextId++){
+		_id(nextId++){
 
 	};
 	sf::TcpSocket* socket;
-	int id;
+	int id() {
+		return _id;
+	}
 
 private:
+	int _id;
 	static int nextId;
 };
 

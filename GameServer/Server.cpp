@@ -14,7 +14,7 @@ Server::~Server(){
 sf::Socket::Status Server::send(Client& client, sf::Packet packet) {
 	sf::Socket::Status status = client.socket->send(packet);
 	if (status == sf::Socket::Disconnected) {
-		cout << "client " << client.socket->getRemoteAddress() << " disconnected" << endl;
+		cout << "client " << client.socket->getRemoteAddress() << ", Id " << client.id() << " disconnected" << endl;
 		client.socket->disconnect();
 		delete client.socket;
 		for (int i = 0; i < _clients.size(); i++) {
@@ -58,7 +58,7 @@ void Server::run() {
 			_clients.push_back(client);
 			// Send client his id
 			sf::Packet packet;
-			packet << PacketType::TId << _clients.back().id;
+			packet << PacketType::TId << _clients.back().id();
 			send(_clients.back(), packet);
 		}
 
