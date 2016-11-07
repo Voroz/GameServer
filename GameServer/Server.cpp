@@ -11,8 +11,9 @@ Server::~Server(){
 
 }
 
-void Server::send(Client& client, sf::Packet packet) {
-	if (client.socket->send(packet) == sf::Socket::Disconnected) {
+sf::Socket::Status Server::send(Client& client, sf::Packet packet) {
+	sf::Socket::Status status = client.socket->send(packet);
+	if (status == sf::Socket::Disconnected) {
 		cout << "client " << client.socket->getRemoteAddress() << " disconnected" << endl;
 		client.socket->disconnect();
 		delete client.socket;
@@ -22,6 +23,7 @@ void Server::send(Client& client, sf::Packet packet) {
 			}
 		}
 	}
+	return status;
 }
 
 void Server::run() {
@@ -39,14 +41,18 @@ void Server::run() {
 	}
 
 	// accept a new connection
+	sf::Clock clock;
 	while (1) {
-		sf::TcpSocket* client = new sf::TcpSocket;
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
-		if (listener.accept(*client) != sf::Socket::Done)
+		sf::TcpSocket* client = new sf::TcpSocket;
+		sf::Socket::Status status = listener.accept(*client);
+
+		if (status != sf::Socket::Done)
 		{
 			delete client;
 		}
-		else {
+		else if (status == sf::Socket::Done){
 			// Create client
 			cout << "client " << client->getRemoteAddress() << " accepted" << endl;
 			_clients.push_back(client);
@@ -56,11 +62,15 @@ void Server::run() {
 			send(_clients.back(), packet);
 		}
 
-		// Ping clients
-		for (int i = 0; i < _clients.size(); i++) {
-			sf::Packet packet;
-			packet << PacketType::TPing;
-			send(_clients[i], packet);
+		// Ping clients every second
+		sf::Time time = clock.getElapsedTime();
+		if (time.asSeconds() >= 1) {
+			for (int i = 0; i < _clients.size(); i++) {
+				sf::Packet packet;
+				packet << PacketType::TPing;
+				send(_clients[i], packet);
+			}
+			clock.restart();
 		}
 	}
 

@@ -3,6 +3,8 @@
 #include <SFML/Network.hpp>
 #include <iostream>
 #include <vector>
+#include <chrono>
+#include <thread>
 
 using namespace std;
 
@@ -35,6 +37,6 @@ public:
 private:
 	vector<Client> _clients;
 
-	void send(Client& client, sf::Packet packet);
+	sf::Socket::Status send(Client& client, sf::Packet packet);
 };
 
