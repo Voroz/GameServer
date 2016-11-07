@@ -5,32 +5,13 @@
 #include <vector>
 #include <chrono>
 #include <thread>
+#include "Client.h"
+#include "PacketType.h"
 
 using namespace std;
 
-enum PacketType{
-	TPing = 0,
-	TId
-};
-
-struct Client {
-	Client(sf::TcpSocket* socket) : 
-		socket(socket),
-		_id(nextId++){
-
-	};
-	sf::TcpSocket* socket;
-	int id() {
-		return _id;
-	}
-
-private:
-	int _id;
-	static int nextId;
-};
-
 struct PendingPacket {
-	Client* client;
+	sf::TcpSocket* socket;
 	sf::Packet packet;
 };
 
@@ -41,12 +22,12 @@ public:
 	~Server();
 
 	void run();
+	void send(sf::TcpSocket& socket, sf::Packet packet);
 
 private:
 	vector<Client> _clients;
 	std::vector<PendingPacket> _pendingPackets;
 
-	void send(Client& client, sf::Packet packet);
 	void sendPendingPackets();
 };
 

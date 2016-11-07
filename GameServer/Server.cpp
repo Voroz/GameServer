@@ -11,26 +11,26 @@ Server::~Server(){
 
 }
 
-void Server::send(Client& client, sf::Packet packet) {
+void Server::send(sf::TcpSocket& socket, sf::Packet packet) {
 	PendingPacket pendingPacket;
-	pendingPacket.client = &client;
+	pendingPacket.socket = &socket;
 	pendingPacket.packet = packet;
 	_pendingPackets.push_back(pendingPacket);
 }
 void Server::sendPendingPackets() {
 	for (int i = 0; i < _pendingPackets.size(); i++) {
-		Client* client = _pendingPackets[i].client;
+		sf::TcpSocket* socket = _pendingPackets[i].socket;
 		sf::Packet& packet = _pendingPackets[i].packet;
-		sf::Socket::Status status = client->socket->send(packet);
+		sf::Socket::Status status = socket->send(packet);
 		if (status == sf::Socket::Disconnected) {
-			cout << "client " << client->socket->getRemoteAddress() << ", Id " << client->id() << " disconnected" << endl;
-			client->socket->disconnect();
-			delete client->socket;
+			cout << "client " << socket->getRemoteAddress() << " disconnected" << endl;
 			for (int i = 0; i < _clients.size(); i++) {
-				if (client == &_clients[i]) {
+				if (socket == _clients[i].socket) {
 					_clients.erase(_clients.begin() + i);
 				}
 			}
+			socket->disconnect();
+			delete socket;
 			_pendingPackets.erase(_pendingPackets.begin() + i);
 		}
 		else if (status == sf::Socket::Done) {
@@ -72,7 +72,7 @@ void Server::run() {
 			// Send client his id
 			sf::Packet packet;
 			packet << PacketType::TId << _clients.back().id();
-			send(_clients.back(), packet);
+			send(*_clients.back().socket, packet);
 		}
 
 		// Ping clients every second
@@ -81,7 +81,7 @@ void Server::run() {
 			for (int i = 0; i < _clients.size(); i++) {
 				sf::Packet packet;
 				packet << PacketType::TPing;
-				send(_clients[i], packet);
+				send(*_clients[i].socket, packet);
 			}
 			clock.restart();
 		}
