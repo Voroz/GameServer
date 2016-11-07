@@ -47,8 +47,10 @@ void Server::run() {
 			delete client;
 		}
 		else {
+			// Create client
 			cout << "client " << client->getRemoteAddress() << " accepted" << endl;
 			_clients.push_back(client);
+			// Send client his id
 			sf::Packet packet;
 			packet << PacketType::TId << _clients.back().id;
 			send(_clients.back(), packet);
