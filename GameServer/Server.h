@@ -29,6 +29,11 @@ private:
 	static int nextId;
 };
 
+struct PendingPacket {
+	Client* client;
+	sf::Packet packet;
+};
+
 class Server
 {
 public:
@@ -39,7 +44,9 @@ public:
 
 private:
 	vector<Client> _clients;
+	std::vector<PendingPacket> _pendingPackets;
 
-	sf::Socket::Status send(Client& client, sf::Packet packet);
+	void send(Client& client, sf::Packet packet);
+	void sendPendingPackets();
 };
 

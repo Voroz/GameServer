@@ -11,19 +11,32 @@ Server::~Server(){
 
 }
 
-sf::Socket::Status Server::send(Client& client, sf::Packet packet) {
-	sf::Socket::Status status = client.socket->send(packet);
-	if (status == sf::Socket::Disconnected) {
-		cout << "client " << client.socket->getRemoteAddress() << ", Id " << client.id() << " disconnected" << endl;
-		client.socket->disconnect();
-		delete client.socket;
-		for (int i = 0; i < _clients.size(); i++) {
-			if (&client == &_clients[i]) {
-				_clients.erase(_clients.begin() + i);
+void Server::send(Client& client, sf::Packet packet) {
+	PendingPacket pendingPacket;
+	pendingPacket.client = &client;
+	pendingPacket.packet = packet;
+	_pendingPackets.push_back(pendingPacket);
+}
+void Server::sendPendingPackets() {
+	for (int i = 0; i < _pendingPackets.size(); i++) {
+		Client* client = _pendingPackets[i].client;
+		sf::Packet& packet = _pendingPackets[i].packet;
+		sf::Socket::Status status = client->socket->send(packet);
+		if (status == sf::Socket::Disconnected) {
+			cout << "client " << client->socket->getRemoteAddress() << ", Id " << client->id() << " disconnected" << endl;
+			client->socket->disconnect();
+			delete client->socket;
+			for (int i = 0; i < _clients.size(); i++) {
+				if (client == &_clients[i]) {
+					_clients.erase(_clients.begin() + i);
+				}
 			}
+			_pendingPackets.erase(_pendingPackets.begin() + i);
 		}
-	}
-	return status;
+		else if (status == sf::Socket::Done) {
+			_pendingPackets.erase(_pendingPackets.begin() + i);
+		}
+	}	
 }
 
 void Server::run() {
@@ -72,6 +85,8 @@ void Server::run() {
 			}
 			clock.restart();
 		}
+
+		sendPendingPackets();
 	}
 
 	// Disconnect clients upon closing server
