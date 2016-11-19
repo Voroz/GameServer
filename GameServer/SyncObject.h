@@ -8,12 +8,14 @@ class SyncManager;
 template<class T> class SyncObject
 {
 public:
-	SyncObject(std::vector<sf::TcpSocket*>& sockets, int id, int inControl, SyncManager* manager) :
+	// TODO: Make class easier to use. Use of = instead of constructor.
+	SyncObject(T data, std::vector<sf::TcpSocket*>& sockets, int id, int inControl, SyncManager* manager) :
 		_clients(clients),
 		_id(id),
 		_inControl(inControl),
 		_managerPtr(manager),
-		_data(T){
+		_data(data){
+		
 		_managerPtr->addObject(this);
 	}
 	~SyncObject() {

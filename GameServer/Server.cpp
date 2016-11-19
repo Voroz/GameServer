@@ -39,7 +39,8 @@ void Server::sendPendingPackets() {
 	}	
 }
 
-sf::Socket::Status Server::receive(sf::TcpSocket* socket, sf::Packet& packet) {
+sf::Socket::Status Server::receive(sf::TcpSocket* socket) {
+	sf::Packet packet;
 	sf::Socket::Status status = socket->receive(packet);
 
 	if (status == sf::Socket::Done) {
@@ -47,16 +48,19 @@ sf::Socket::Status Server::receive(sf::TcpSocket* socket, sf::Packet& packet) {
 		packet >> type;
 		cout << "received packet, Type: " << type;
 		if (type == PacketType::TSyncObjects) {
-
-		}
-		else {
-			cout << endl;
+			int id;
+			int data; // TODO: Change from int to any data type.
+			packet >> id >> data;
+			_pSyncManager->syncObject(id, data, socket);
 		}
 	}
 	else if (status == sf::Socket::Partial) {
 		cout << "Partial packet received..." << endl;
 	}
 	return status;
+}
+void Server::linkSyncManager(SyncManager& syncManager) {
+	_pSyncManager = &syncManager;
 }
 
 void Server::run() {
@@ -105,6 +109,14 @@ void Server::run() {
 			}
 			clock.restart();
 		}
+
+		// Receive packets and do receive stuff
+		for (auto client : _clients) {
+			receive(client.socket);
+		}
+
+		// Send sync objects
+		_pSyncManager->sendObjects();
 
 		sendPendingPackets();
 	}

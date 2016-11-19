@@ -7,6 +7,7 @@
 #include <thread>
 #include "Client.h"
 #include "PacketType.h"
+#include "SyncManager.h"
 
 using namespace std;
 
@@ -23,12 +24,14 @@ public:
 
 	void run();
 	void send(sf::TcpSocket& socket, sf::Packet packet);
-	sf::Socket::Status receive(sf::TcpSocket* socket, sf::Packet& packet);
+	sf::Socket::Status receive(sf::TcpSocket* socket);
+	void linkSyncManager(SyncManager& syncManager);
 
 private:
 	vector<Client> _clients;
 	std::vector<PendingPacket> _pendingPackets;
 
 	void sendPendingPackets();
+	SyncManager* _pSyncManager;
 };
 

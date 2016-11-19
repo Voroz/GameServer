@@ -5,19 +5,20 @@
 #include "Server.h"
 #include "Client.h"
 
+class Server;
 
 class SyncManager
 {
 public:
 	SyncManager(Server* server);
 	~SyncManager();
-	int addObject(SyncObject<void*>& obj);
+	void addObject(SyncObject<int>& obj);
 	int removeObject(int id);
-	void syncObjects(std::vector<SyncObject<void*>*> objectsToSync); // Use this function in server.receive()
+	void syncObject(int id, int newData, sf::TcpSocket* socket); // Use this function in server.receive()
 	void sendObjects();
 
 private:
-	std::map<int, SyncObject<void*>*> _syncObjects;
-	Server* _serverPtr;
+	std::map<int, SyncObject<int>*> _syncObjects; // TODO: Change to any data type
+	Server* _pServer;
 };
 

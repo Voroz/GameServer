@@ -1,6 +1,7 @@
 #pragma once
 #include <SFML/System.hpp>
 #include <SFML/Network.hpp>
+#include "SyncObject.h"
 
 class Client {
 public:
