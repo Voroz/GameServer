@@ -23,6 +23,7 @@ public:
 
 	void run();
 	void send(sf::TcpSocket& socket, sf::Packet packet);
+	sf::Socket::Status receive(sf::TcpSocket* socket, sf::Packet& packet);
 
 private:
 	vector<Client> _clients;

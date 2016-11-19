@@ -12,7 +12,8 @@ public:
 		_clients(clients),
 		_id(id),
 		_inControl(inControl),
-		_managerPtr(manager){
+		_managerPtr(manager),
+		_data(T){
 		_managerPtr->addObject(this);
 	}
 	~SyncObject() {
@@ -27,11 +28,18 @@ public:
 	bool inControl() {
 		return _inControl;
 	}
+	T data() {
+		return _data;
+	}
+	void setData(T newData) {
+		_data = newData;
+	}
 
 private:
+	T _data;
 	std::vector<sf::TcpSocket*>& _sockets;
 	int _id; // Should be same on client and server, 1 id per object.
-	bool _inControl; // Only server OR client should be in control of the object.
+	const bool _inControl; // Only server OR client should be in control of the object.
 	SyncManager* _managerPtr;
 };
 

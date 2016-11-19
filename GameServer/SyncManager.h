@@ -12,13 +12,12 @@ public:
 	SyncManager(Server* server);
 	~SyncManager();
 	int addObject(SyncObject<void*>& obj);
-	int removeObject(SyncObject<void*>& obj);
-	std::vector<SyncObject<void*>&> inControlObjects(Client* client); // TODO: Send these objects to their clients if values were changed
-	std::vector<SyncObject<void*>&> toBeSyncedObjects(); // TODO: in client.receive(), sync the objects where client ids and obj ids match
-	void syncObjects(); // Use this function in server.receive()
+	int removeObject(int id);
+	void syncObjects(std::vector<SyncObject<void*>*> objectsToSync); // Use this function in server.receive()
+	void sendObjects();
 
 private:
-	std::vector<SyncObject<void*>*> _syncObjects;
+	std::map<int, SyncObject<void*>*> _syncObjects;
 	Server* _serverPtr;
 };
 

@@ -39,6 +39,26 @@ void Server::sendPendingPackets() {
 	}	
 }
 
+sf::Socket::Status Server::receive(sf::TcpSocket* socket, sf::Packet& packet) {
+	sf::Socket::Status status = socket->receive(packet);
+
+	if (status == sf::Socket::Done) {
+		int type;
+		packet >> type;
+		cout << "received packet, Type: " << type;
+		if (type == PacketType::TSyncObjects) {
+
+		}
+		else {
+			cout << endl;
+		}
+	}
+	else if (status == sf::Socket::Partial) {
+		cout << "Partial packet received..." << endl;
+	}
+	return status;
+}
+
 void Server::run() {
 	sf::TcpListener listener;
 	listener.setBlocking(false);
